@@ -64,9 +64,9 @@ def trainModel(trainingData):
 
     # Initializing
     modelLower = []
-    modelLower = [100 for i in range(57)]
+    modelLower = [float(100) for i in range(57)]
     modelUpper = []
-    modelUpper = [0 for i in range(57)]
+    modelUpper = [float(0) for i in range(57)]
     
     for x in range(len(trainingData)):
         for y in range((len(trainingData[x]) - 1)):
