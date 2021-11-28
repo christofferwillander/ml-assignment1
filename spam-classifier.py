@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 def main():
     # Reading dataset into Pandas DataFrame
@@ -143,12 +142,14 @@ def verifyModel(binnedTestData, binnedTrainingData):
 
     return TP, TN, FP, FN
 
+# Function for cross-checking the current row against the training data (i.e. model prediction)
 def checkEntry(row, uniqueBins):
     for feature in range(len(row) - 1):
         if not row[feature] in uniqueBins[feature]:
             return 0
     return 1
 
+# Function for deriving the LGG-conj rule
 def LGG(binnedTestData, binnedTrainingData):
     conjunctiveRule = []
     testDataBins = []
@@ -172,9 +173,10 @@ def LGG(binnedTestData, binnedTrainingData):
         
         conjunctiveRule.append(bins)
     
+    # Sorting the bin numbers for each respective feature in ascending order
     for i in range(len(conjunctiveRule)):
         conjunctiveRule[i].sort()
-        
+
     return conjunctiveRule
 
 
