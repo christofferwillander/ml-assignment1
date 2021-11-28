@@ -2,9 +2,17 @@
 **Assignment 1 in the course Machine Learning (DV2578). ML concept learner in Python for detecting spam e-mails.**
 
 ## General information
-Model information, model performance metrics and the LGG rule is printed in the terminal after execution of the *spam-classifier.py* script.
+Model information, model performance metrics and the *LGG* (*LGG-conj*) rule is printed in the terminal after execution of the *spam-classifier.py* script based on the *Spambase* data set from *UCI Machine Learning Repository*.
 
-Training data is discretizised using *pandas*, where a total of 100 bins are used. The test data is discretizised using the bin bounds given by the training data, and hence they have the same scale.
+Training data is discretizised using *pandas*, where a total of 100 bins are used. The test data is discretizised using the bin bounds given by the training data, and hence they have the same scale. The data set is shuffled during each execution, to avoid bias.
+
+*Avg. accurary:* ~82 %
+*Avg. precision:* ~48 %
+*Avg. recall:* ~70 %
+*Avg. specificity:* ~85 %
+*Avg. false-positive rate:* ~15 %
+*Avg. false-positive rate:* ~28 %
+*Avg. F1 score:* ~0.55
 
 ## Setup
 **Requirements:** *Python 3.10.0*, *pip 21.3.1*, *pandas*
