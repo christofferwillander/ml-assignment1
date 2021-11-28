@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def main():
     # Reading dataset into Pandas DataFrame
@@ -75,7 +76,8 @@ def main():
     # Printing LGG rule
     conjunctiveRule = LGG(testData, binnedTrainingData)
     print("\n------ Least General Generalization (LGG) rule ------")
-    print(conjunctiveRule)
+    for feature in range(len(conjunctiveRule)):
+        print("Feature " + str(feature + 1) + ": " + str(conjunctiveRule[feature]))
 
 def calcHypothesisSpace(binnedTrainingData, nrOfBins):
     binCounts = [0 for i in range(nrOfBins)]
@@ -170,6 +172,9 @@ def LGG(binnedTestData, binnedTrainingData):
         
         conjunctiveRule.append(bins)
     
+    for i in range(len(conjunctiveRule)):
+        conjunctiveRule[i].sort()
+        
     return conjunctiveRule
 
 
