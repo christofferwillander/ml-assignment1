@@ -17,4 +17,4 @@ Simply install Python and pip, and then run the *pip install -r requirements.txt
 The script is executed by simply typing *python spam-classifier.py* in the terminal while the CWD is the root of the assignment folder.
 
 ## Author
-Christoffer Willander (DVACD17)
+Christoffer Willander (DVACD17) - *chal17@student.bth.se*
