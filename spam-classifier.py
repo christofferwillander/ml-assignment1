@@ -2,13 +2,14 @@ import pandas as pd
 
 def main():
     # Reading dataset into Pandas DataFrame
-    data = pd.read_csv("./data/spambase.data", header=None)
+    data = pd.read_csv("./data/spambase.data", sep=",", header=None)
 
     # Selecting the spam data
     spam = data.loc[data[57] == 1]
 
     # Shuffling the spam data
     spam = spam.sample(frac = 1)
+    spam.reset_index(inplace = True, drop = True)
 
     # Selecting the ham data
     ham = data.loc[data[57] == 0]
@@ -29,7 +30,7 @@ def main():
     # Discretizising all training data features into 8 equal-width bins (creating model)
     trainingBins = []
     binnedTrainingData = trainingData.copy()
-    nrOfBins = 100
+    nrOfBins = 50
     labels = [i + 1 for i in range(nrOfBins)]
     print("------ Model information ------")
     print("Number of bins: " + str(nrOfBins))
@@ -42,13 +43,11 @@ def main():
     for i in range(len(trainingData.columns - 1)):
         testData[i] = pd.cut(x=testData[i], bins=trainingBins[i], ordered=True, duplicates="drop", include_lowest=True, labels=labels)
     
-    # Calculating hypothesis space based on the discretizised training data
-    hypothesisSpace = calcHypothesisSpace(binnedTrainingData, nrOfBins)
-    print("Size of hypothesis space: " + str(hypothesisSpace))
+    # Printing size of hypothesis space based on the discretizsed data
+    print("Size of hypothesis space: 2^(" + str(nrOfBins) + "^57) for " + str(nrOfBins) + " bins")
 
-    # Calculating conjunctive concepts based on the discretizised training data
-    conjunctiveConcepts = calcConjunctiveConcepts(binnedTrainingData, nrOfBins)
-    print("Number of conjunctive concepts: " + str(conjunctiveConcepts))
+    # Printing humber of conjunctive concepts based on the discretizsed data
+    print("Number of conjunctive concepts: " + str(nrOfBins + 1) + "^57 for " + str(nrOfBins) + " bins")
 
     # Verifying model against test dataset
     TP, TN, FP, FN = verifyModel(testData, binnedTrainingData)
@@ -73,40 +72,17 @@ def main():
     print ("F1 score: " + str(round(F1, 2)))
 
     # Printing LGG rule
-    conjunctiveRule = LGG(testData, binnedTrainingData)
-    print("\n------ Least General Generalization (LGG) rule ------")
+    conjunctiveRule = LGG(binnedTrainingData)
+    print("\n------ Least General Generalization (LGG-Conj-ID) rule (generalization vector for features 1 - 57) ------")
+    LGGstring = "LGG = <"
     for feature in range(len(conjunctiveRule)):
-        print("Feature " + str(feature + 1) + ": " + str(conjunctiveRule[feature]))
+        LGGstring += str(conjunctiveRule[feature])
 
-def calcHypothesisSpace(binnedTrainingData, nrOfBins):
-    binCounts = [0 for i in range(nrOfBins)]
-    hypothesisSpace = 1
-
-    # Calculating number of non-empty bins for each feature
-    for feature in range(len(binnedTrainingData.columns)):
-        uniqueBins = binnedTrainingData[feature].nunique()
-        binCounts[uniqueBins - 1] = binCounts[uniqueBins - 1] + 1
-
-    # Calculating hypothesis space based on total bin counts
-    for x in range(nrOfBins):
-        hypothesisSpace = hypothesisSpace * pow((x + 1), binCounts[x])
-
-    return hypothesisSpace
-
-def calcConjunctiveConcepts(binnedTrainingData, nrOfBins):
-    binCounts = [0 for i in range(nrOfBins + 1)]
-    conjunctiveConcepts = 1
-
-    # Calculating number of non-empty bins for each feature
-    for feature in range(len(binnedTrainingData.columns)):
-        uniqueBins = binnedTrainingData[feature].nunique()
-        binCounts[uniqueBins] = binCounts[uniqueBins] + 1
-
-    # Calculating conjunctive convepts based on total bin counts
-    for x in range(nrOfBins):
-        conjunctiveConcepts = conjunctiveConcepts * pow((x + 1), binCounts[x])
-
-    return conjunctiveConcepts
+        if feature < (len(conjunctiveRule) - 1):
+            LGGstring += ", "
+        else:
+            LGGstring += ">\n"
+    print(LGGstring)
 
 def verifyModel(binnedTestData, binnedTrainingData):
     TP = 0
@@ -150,34 +126,18 @@ def checkEntry(row, uniqueBins):
     return 1
 
 # Function for deriving the LGG-conj rule
-def LGG(binnedTestData, binnedTrainingData):
-    conjunctiveRule = []
-    testDataBins = []
-    trainingDataBins = []
-
-    # Extracting unique bins for each feature in test data
-    for feature in range(len(binnedTestData.columns)):
-        testDataBins.append(binnedTestData[feature].unique())
+def LGG(binnedTrainingData):
+    uniqueTrainingDataBins = []
     
     # Extracting unique bins for each feature in training data
     for feature in range(len(binnedTrainingData.columns)):
-        trainingDataBins.append(binnedTrainingData[feature].unique())
+        currentFeature = []
+        for bin in range(len(binnedTrainingData[feature].value_counts())):
+            if (binnedTrainingData[feature].value_counts()[bin]) > 0:
+                currentFeature.append(bin + 1)
+        uniqueTrainingDataBins.append(currentFeature)
 
-    # For each feature, checking for common bins in training and test data sets
-    for feature in range(len(trainingDataBins)):    
-        bins = []
-
-        for bin in range(len(testDataBins[feature])):
-            if testDataBins[feature][bin] in trainingDataBins[feature]:
-                bins.append(testDataBins[feature][bin])
-        
-        conjunctiveRule.append(bins)
-    
-    # Sorting the bin numbers for each respective feature in ascending order
-    for i in range(len(conjunctiveRule)):
-        conjunctiveRule[i].sort()
-
-    return conjunctiveRule
+    return uniqueTrainingDataBins
 
 
 if __name__ == "__main__":
